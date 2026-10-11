@@ -1,0 +1,11 @@
+FROM node:20-alpine AS build
+WORKDIR /build
+COPY app.zip .
+RUN unzip -q app.zip
+WORKDIR /build/robux-earn-hub/frontend
+RUN npm ci && npm run build
+
+FROM nginx:1.27-alpine
+COPY --from=build /build/robux-earn-hub/frontend/nginx.conf.template /etc/nginx/templates/default.conf.template
+COPY --from=build /build/robux-earn-hub/frontend/dist /usr/share/nginx/html
+ENV PORT=8080 API_UPSTREAM=server.railway.internal:4000 DNS_RESOLVER=[fd12::10]

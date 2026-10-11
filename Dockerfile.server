@@ -1,0 +1,9 @@
+FROM node:20-bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends openssl unzip ca-certificates && rm -rf /var/lib/apt/lists/*
+WORKDIR /build
+COPY app.zip .
+RUN unzip -q app.zip
+WORKDIR /build/robux-earn-hub/server
+RUN npm install && npm run build
+EXPOSE 4000
+CMD ["sh", "-c", "NODE_ENV=production npx prisma db push --skip-generate && NODE_ENV=production node dist/index.js"]
